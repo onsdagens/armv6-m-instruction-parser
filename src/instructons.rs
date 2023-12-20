@@ -1,8 +1,8 @@
 //! Provides a instruction type and a enum with all operations and there arguments.
 
 use crate::{
-    conditions::Condition,
-    registers::{Register, SpecialRegister},
+    //    conditions::Condition,
+    registers::Register,
 };
 
 /// Struct describing an instruction.
@@ -16,15 +16,9 @@ pub struct Instruction {
 #[derive(Debug)]
 pub enum InstructionWidth {
     Bit32,
-    Bit16,
 }
 
 impl Instruction {
-    /// To check if instruction width is 16 bits.
-    pub fn is_16bit(&self) -> bool {
-        matches!(self.width, InstructionWidth::Bit16)
-    }
-
     /// To check if instruction width is 32 bits.
     pub fn is_32bit(&self) -> bool {
         matches!(self.width, InstructionWidth::Bit32)
@@ -32,300 +26,236 @@ impl Instruction {
 }
 
 /// Describes operation i.e. what type of instruction it is.
+#[allow(non_camel_case_types)]
 #[derive(Debug)]
 pub enum Operation {
-    ADCReg {
-        m: Register,
-        n: Register,
-        d: Register,
-    },
-    ADDImm {
-        imm: u32,
-        n: Register,
-        d: Register,
-    },
-    ADDReg {
-        m: Register,
-        n: Register,
-        d: Register,
-    },
-    ADDImmSP {
-        d: Register,
+    LUI {
+        rd: Register,
         imm: u32,
     },
-    ADDRegSP {
-        d: Register,
-        m: Register,
-    },
-    ADR {
-        d: Register,
+    AUIPC {
+        rd: Register,
         imm: u32,
     },
-    ANDReg {
-        m: Register,
-        dn: Register,
-    },
-    ASRImm {
-        imm: u32,
-        m: Register,
-        d: Register,
-    },
-    ASRReg {
-        m: Register,
-        dn: Register,
-    },
-    B {
-        cond: Condition,
+    JAL {
+        rd: Register,
         imm: u32,
     },
-    BICReg {
-        m: Register,
-        dn: Register,
+    JALR {
+        rd: Register,
+        rs1: Register,
+        imm: u16,
     },
-    BKPT {
-        imm: u32,
+    BEQ {
+        imm: u16,
+        rs1: Register,
+        rs2: Register,
     },
-    BL {
-        imm: u32,
+    BNE {
+        imm: u16,
+        rs1: Register,
+        rs2: Register,
     },
-    BLXReg {
-        m: Register,
+    BLT {
+        imm: u16,
+        rs1: Register,
+        rs2: Register,
     },
-    BX {
-        m: Register,
+    BGE {
+        imm: u16,
+        rs1: Register,
+        rs2: Register,
     },
-    CMNReg {
-        m: Register,
-        n: Register,
+    BLTU {
+        imm: u16,
+        rs1: Register,
+        rs2: Register,
     },
-    CMPImm {
-        n: Register,
-        imm: u32,
+    BGEU {
+        imm: u16,
+        rs1: Register,
+        rs2: Register,
     },
-    CMPReg {
-        m: Register,
-        n: Register,
+    LB {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    CPS {
-        im: bool,
+    LH {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    CPY,
-    DMB {
-        option: u8,
+    LW {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    DSB {
-        option: u8,
+    LBU {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    EORReg {
-        m: Register,
-        dn: Register,
+    LHU {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    ISB {
-        option: u8,
+    SB {
+        imm: u16,
+        rs2: Register,
+        rs1: Register,
     },
-    LDM {
-        n: Register,
-        reg_list: Vec<Register>,
+    SH {
+        imm: u16,
+        rs2: Register,
+        rs1: Register,
     },
-    LDRImm {
-        imm: u32,
-        n: Register,
-        t: Register,
+    SW {
+        imm: u16,
+        rs2: Register,
+        rs1: Register,
     },
-    LDRLiteral {
-        t: Register,
-        imm: u32,
+    ADDI {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    LDRReg {
-        m: Register,
-        n: Register,
-        t: Register,
+    SLTI {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    LDRBImm {
-        imm: u32,
-        n: Register,
-        t: Register,
+    SLTIU {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    LDRBReg {
-        m: Register,
-        n: Register,
-        t: Register,
+    XORI {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    LDRHImm {
-        imm: u32,
-        n: Register,
-        t: Register,
+    ORI {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    LDRHReg {
-        m: Register,
-        n: Register,
-        t: Register,
+    ANDI {
+        imm: u16,
+        rs1: Register,
+        rd: Register,
     },
-    LDRSBReg {
-        m: Register,
-        n: Register,
-        t: Register,
+    SLLI {
+        shamt: u8,
+        rs1: Register,
+        rd: Register,
     },
-    LDRSH {
-        m: Register,
-        n: Register,
-        t: Register,
+    SRLI {
+        shamt: u8,
+        rs1: Register,
+        rd: Register,
     },
-    LSLImm {
-        imm: u32,
-        m: Register,
-        d: Register,
+    SRAI {
+        shamt: u8,
+        rs1: Register,
+        rd: Register,
     },
-    LSLReg {
-        m: Register,
-        dn: Register,
+    ADD {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    LSRImm {
-        imm: u32,
-        m: Register,
-        d: Register,
+    SUB {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    LSRReg {
-        m: Register,
-        dn: Register,
+    SLL {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    MOVImm {
-        d: Register,
-        imm: u32,
+    SLT {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    MOVReg {
-        m: Register,
-        d: Register,
-        set_flags: bool,
+    SLTU {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    MRS {
-        d: Register,
-        sysm: SpecialRegister,
+    XOR {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    MSRReg {
-        n: Register,
-        sysm: SpecialRegister,
+    SRL {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    MUL {
-        n: Register,
-        dm: Register,
+    SRA {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    MVNReg {
-        m: Register,
-        d: Register,
+    OR {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    NOP,
-    ORRReg {
-        m: Register,
-        dn: Register,
+    AND {
+        rs2: Register,
+        rs1: Register,
+        rd: Register,
     },
-    POP {
-        reg_list: Vec<Register>,
+    FENCE {
+        //fence is nop under syncrim
     },
-    PUSH {
-        reg_list: Vec<Register>,
+    FENCE_I {
+        //fence is nop under syncrim
     },
-    REV {
-        m: Register,
-        d: Register,
+    ECALL {
+        //magic number
     },
-    REV16 {
-        m: Register,
-        d: Register,
+    EBREAK {
+        //magic number
     },
-    REVSH {
-        m: Register,
-        d: Register,
+    MRET {
+        //magic number
     },
-    RORReg {
-        m: Register,
-        dn: Register,
+    CSRRW {
+        csr: u16,
+        rs1: Register,
+        rd: Register,
     },
-    RSBImm {
-        n: Register,
-        d: Register,
+    CSRRS {
+        csr: u16,
+        rs1: Register,
+        rd: Register,
     },
-    SBCReg {
-        m: Register,
-        dn: Register,
+    CSRRC {
+        csr: u16,
+        rs1: Register,
+        rd: Register,
     },
-    SEV,
-    STM {
-        n: Register,
-        reg_list: Vec<Register>,
+    CSRRWI {
+        csr: u16,
+        zimm: u8,
+        rd: Register,
     },
-    STRImm {
-        imm: u32,
-        n: Register,
-        t: Register,
+    CSRRSI {
+        csr: u16,
+        zimm: u8,
+        rd: Register,
     },
-    STRReg {
-        m: Register,
-        n: Register,
-        t: Register,
+    CSRRCI {
+        csr: u16,
+        zimm: u8,
+        rd: Register,
     },
-    STRBImm {
-        imm: u32,
-        n: Register,
-        t: Register,
-    },
-    STRBReg {
-        m: Register,
-        n: Register,
-        t: Register,
-    },
-    STRHImm {
-        imm: u32,
-        n: Register,
-        t: Register,
-    },
-    STRHReg {
-        m: Register,
-        n: Register,
-        t: Register,
-    },
-    SUBImm {
-        imm: u32,
-        n: Register,
-        d: Register,
-    },
-    SUBReg {
-        m: Register,
-        n: Register,
-        d: Register,
-    },
-    SUBImmSP {
-        imm: u32,
-    },
-    SVC {
-        imm: u32,
-    },
-    SXTB {
-        m: Register,
-        d: Register,
-    },
-    SXTH {
-        m: Register,
-        d: Register,
-    },
-    TSTReg {
-        m: Register,
-        n: Register,
-    },
-    UDF {
-        imm: u32,
-    },
-    UXTB {
-        m: Register,
-        d: Register,
-    },
-    UXTH {
-        m: Register,
-        d: Register,
-    },
-    WFE,
-    WFI,
-    YIELD,
 }
 
 #[cfg(test)]
@@ -336,16 +266,12 @@ mod test {
     fn instruction_size() {
         let instruction_32 = Instruction {
             width: InstructionWidth::Bit32,
-            operation: Operation::NOP,
+            operation: Operation::ADD {
+                rs2: Register::ZERO,
+                rs1: Register::ZERO,
+                rd: Register::ZERO,
+            }, //nop,
         };
         assert_eq!(instruction_32.is_32bit(), true);
-        assert_eq!(instruction_32.is_16bit(), false);
-
-        let instruction_16 = Instruction {
-            width: InstructionWidth::Bit16,
-            operation: Operation::NOP,
-        };
-        assert_eq!(instruction_16.is_32bit(), false);
-        assert_eq!(instruction_16.is_16bit(), true);
     }
 }
