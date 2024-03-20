@@ -110,10 +110,7 @@ mod tests {
         assert_eq!(13.try_into(), Ok(Register::A3));
         assert_eq!(14.try_into(), Ok(Register::A4));
         assert_eq!(15.try_into(), Ok(Register::A5));
-        assert_eq!(
-            16.try_into(),
-            Ok(Register::A6)
-        );
+        assert_eq!(16.try_into(), Ok(Register::A6));
     }
 
     #[test]

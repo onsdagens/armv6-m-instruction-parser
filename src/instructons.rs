@@ -1,9 +1,6 @@
 //! Provides a instruction type and a enum with all operations and there arguments.
 
-use crate::{
-    //    conditions::Condition,
-    registers::Register,
-};
+use crate::registers::Register;
 
 /// Struct describing an instruction.
 #[derive(Debug)]
@@ -44,35 +41,35 @@ pub enum Operation {
     JALR {
         rd: Register,
         rs1: Register,
-        imm: u16,
+        imm: u32,
     },
     BEQ {
-        imm: u16,
+        imm: u32,
         rs1: Register,
         rs2: Register,
     },
     BNE {
-        imm: u16,
+        imm: u32,
         rs1: Register,
         rs2: Register,
     },
     BLT {
-        imm: u16,
+        imm: u32,
         rs1: Register,
         rs2: Register,
     },
     BGE {
-        imm: u16,
+        imm: u32,
         rs1: Register,
         rs2: Register,
     },
     BLTU {
-        imm: u16,
+        imm: u32,
         rs1: Register,
         rs2: Register,
     },
     BGEU {
-        imm: u16,
+        imm: u32,
         rs1: Register,
         rs2: Register,
     },
@@ -117,7 +114,7 @@ pub enum Operation {
         rs1: Register,
     },
     ADDI {
-        imm: u16,
+        imm: i32,
         rs1: Register,
         rd: Register,
     },

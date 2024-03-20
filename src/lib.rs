@@ -30,19 +30,19 @@ pub fn parse(input: &[u8]) -> Result<Instruction, String> {
         ]))?,
     })
 }
-
+use bitutils::sign_extend32;
 fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
     let opcode = instruction & 0b1111111;
     let funct3 = (instruction & (0b111 << 12)) >> 12;
     let funct7 = (instruction & (0b1111111 << 25)) >> 25;
-    let imm = instruction >> 20;
+    let imm = sign_extend32(instruction >> 20, 12);
     let shamt = (instruction & (0b11111 << 20)) >> 20;
     let imm_big = instruction & 0xFFFFF000;
-    let imm_big_shuffled = (((instruction & (0b1 << 31)) >> (31 - 20))
+    let imm_big_shuffled = sign_extend32((((instruction & (0b1 << 31)) >> (31 - 20))
         | ((instruction & (0b1111111111 << 21)) >> (30 - 10))
         | ((instruction & (0b1 << 20)) >> (20 - 11))
         | (instruction & (0b11111111 << 12)))
-        & 0b1111_1111_1111_1111_1111_1111_1111_1110;
+        & 0b1111_1111_1111_1111_1111_1111_1111_1110,21 );
     //no idea why this is encoded this way but the ISA is what it is
     let imm_store =
         ((instruction & (0b11111 << 7)) >> 7) | ((instruction & (0b1111111 << 25)) >> 20);
@@ -123,7 +123,7 @@ fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
                 0b000 => {
                     //ADDI
                     Ok(Operation::ADDI {
-                        imm: imm as u16,
+                        imm: imm as i32,
                         rs1,
                         rd,
                     })
@@ -211,7 +211,7 @@ fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
             //JAL
             let rd = (((instruction & (0b11111 << 7)) >> 7) as u8).try_into()?;
             let imm = imm_big_shuffled;
-            Ok(Operation::JAL { rd, imm })
+            Ok(Operation::JAL { rd, imm:imm as u32 })
         }
         0b1100111 => {
             //JALR
@@ -221,21 +221,46 @@ fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
             Ok(Operation::JALR {
                 rd,
                 rs1,
-                imm: jalr_imm as u16,
+                imm: jalr_imm as u32,
             })
         }
         0b1100011 => {
             //BRANCH
-
-            // let rs1 = (((instruction & (0b11111 << 15)) >> 15) as u8).try_into().unwrap();
-            // let rs2 = (((instruction & (0b11111 << 20)) >> 20) as u8).try_into().unwrap();
-
+            let rd = (((instruction & (0b11111 << 7)) >> 7) as u8)
+                .try_into()
+                .unwrap();
+            let rs1 = (((instruction & (0b11111 << 15)) >> 15) as u8)
+                .try_into()
+                .unwrap();
+            let rs2 = (((instruction & (0b11111 << 20)) >> 20) as u8)
+                .try_into()
+                .unwrap();
+            let imm = sign_extend32((((instruction & (0b1 << 31)) >> 19)
+                | ((instruction & (0b111111 << 25)) >> 20)
+                | ((instruction & (0b1111 << 8)) >> 7)
+                | ((instruction & (0b1 << 7)) << 4)),21);
+            match funct3 {
+                0b000 => {
+                    //beq
+                    Ok(Operation::BEQ { imm: imm as u32, rs1, rs2 })
+                } //beq
+                0b001 => Ok(Operation::BNE { imm: imm as u32, rs1, rs2 }), //bne
+                0b100 => Ok(Operation::BLT { imm: imm as u32, rs1, rs2 }), //blt
+                0b101 => Ok(Operation::BGE { imm: imm as u32, rs1, rs2 }), //bge
+                0b110 => Ok(Operation::BLTU { imm: imm as u32, rs1, rs2 }), //bltu
+                0b111 => Ok(Operation::BGEU { imm: imm as u32, rs1, rs2 }), //bgeu
+                0b011 => Ok(Operation::JALR { rd, rs1, imm: imm as u32 }), //jalr
+                0b010 => Ok(Operation::JAL { rd, imm: imm as u32 }),
+                _ => {
+                    unreachable!()
+                }
+            }
             /* let branch_imm = (((instruction & (0b1 << 31)) >> 19)
             | ((instruction & (0b111111 << 25)) >> 20)
             | ((instruction & (0b1111 << 8)) >> 7)
             | ((instruction & (0b1 << 7)) << 4))
             .into();*/
-            todo!()
+            //todo!()
         }
 
         0b0000011 => {
@@ -243,25 +268,21 @@ fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
             //let rd = (((instruction & (0b11111 << 7)) >> 7) as u8).try_into().unwrap();
             //let rs1 = (((instruction & (0b11111 << 15)) >> 15) as u8).try_into().unwrap();
 
-            let imm = imm; //immediate
-                           //todo!();
+            let imm = imm as u16; //immediate
+                                  //todo!();
+            let rd = (((instruction & (0b11111 << 7)) >> 7) as u8)
+                .try_into()
+                .unwrap();
+            let rs1 = (((instruction & (0b11111 << 15)) >> 15) as u8)
+                .try_into()
+                .unwrap();
 
             match funct3 {
-                0b000 => {
-                    todo!();
-                } //lb
-                0b001 => {
-                    todo!();
-                } //lh
-                0b010 => {
-                    todo!();
-                } //lw
-                0b100 => {
-                    todo!();
-                } //lbu
-                0b101 => {
-                    todo!();
-                } //lhu
+                0b000 => Ok(Operation::LB { imm, rs1, rd }),  //lb
+                0b001 => Ok(Operation::LH { imm, rs1, rd }),  //lh
+                0b010 => Ok(Operation::LW { imm, rs1, rd }),  //lw
+                0b100 => Ok(Operation::LBU { imm, rs1, rd }), //lbu
+                0b101 => Ok(Operation::LHU { imm, rs1, rd }), //lhu
                 _ => {
                     panic!("Unsupported funct3 {:b}", funct3)
                 }

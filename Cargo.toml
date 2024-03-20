@@ -12,3 +12,4 @@ readme="README.md"
 
 [dependencies]
 tracing = "0.1"
+bitutils = "3.0.1"
