@@ -242,10 +242,10 @@ fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
                 .try_into()
                 .unwrap();
             let imm = sign_extend32(
-                (((instruction & (0b1 << 31)) >> 19)
+                ((instruction & (0b1 << 31)) >> 19)
                     | ((instruction & (0b111111 << 25)) >> 20)
                     | ((instruction & (0b1111 << 8)) >> 7)
-                    | ((instruction & (0b1 << 7)) << 4)),
+                    | ((instruction & (0b1 << 7)) << 4),
                 13,
             );
             match funct3 {
@@ -412,7 +412,7 @@ fn parse_32bit_operation(instruction: u32) -> Result<Operation, String> {
     }
 }
 
-trait SignExtend {
+/*trait SignExtend {
     fn sign_extend(&self, valid_bits: usize) -> u32;
 }
 
@@ -449,4 +449,4 @@ mod test {
         assert_eq!(0xfffffff9, 0x9u32.sign_extend(4));
         assert_eq!(0x00000009, 0x9u32.sign_extend(5));
     }
-}
+}*/
